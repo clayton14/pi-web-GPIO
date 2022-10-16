@@ -31,15 +31,15 @@ async def root():
     return {"Message":"Hi"}
 
 
-@app.get("/pin_test/{num}/{status}")
-async def avivate_pin(num: int, status: int):
-    try:
-        GPIO.setup(num, GPIO.OUT)
-        GPIO.output(num, status)
-        print(num)
-        return f"testing pin {num}"
-    except:
-         raise HTTPException(status_code=500, detail="Invalid rpi pin")
+# @app.get("/pin_test/{num}/{status}")
+# async def avivate_pin(num: int, status: int):
+#     try:
+#         GPIO.setup(num, GPIO.OUT)
+#         GPIO.output(num, status)
+#         print(num)
+#         return f"testing pin {num}"
+#     except:
+#          raise HTTPException(status_code=500, detail="Invalid rpi pin")
 
 
 
