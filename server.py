@@ -1,86 +1,97 @@
-from fastapi  import FastAPI, HTTPException, APIRouter
+import imp
+from fastapi  import Depends, FastAPI, HTTPException, APIRouter
 import RPi.GPIO as GPIO
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 import pydantic
 import uvicorn
 import asyncio
-import json, time
+from config.db import engine, SessionLocal
+from sqlalchemy.orm import session
+from thing import ThingModel
+app = FastAPI(title="Power Controll")
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+ThingModel.metadata.create_all(bind=engine)
+
+
+def get_db():
+    try:
+        db = SessionLocal()
+        yield db
+    except:
+        print("[ERROR] DB Shat")
+    finally:
+        db.close()
+
 
 class Thing(BaseModel):
     name: str
-    board_pin: int
-    status: bool
+    board_pin: int = Field(..., gt=1, lt=40)
+    status: bool = False
 
 
 
-app = FastAPI(title="Power Controll")
-# app = APIRouter()
-# gpioList = [2, 3, 4, 17, 27, 22, 10, 9]
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-# for i in gpioList:
-   
-#     GPIO.output(i, GPIO.HIGH)
-
-thing_list = []
-
-
+#using depedency injection
 @app.get("/")
-async def root():
-    return {"Message":"Hi"}
+async def root(db: session = Depends(get_db)):
+    return db.query(ThingModel).all()
 
 
-# @app.get("/pin_test/{num}/{status}")
-# async def avivate_pin(num: int, status: int):
+@app.post("/")
+async def create_thing(thing: Thing, db: session = Depends(get_db)):
+    """
+    Creat a thing model and add to database
+    """
+    thing_model = ThingModel
+    thing_model.name = thing.name
+    thing_model.board_pin = thing.board_pin
+    thing_model.status = thing.status
+    db.add(thing_model)
+    db.commit()
+
+    return thing
+
+
+@app.put("/")
+async def update_thing(id: int, thing: Thing, db: session = Depends(get_db)):
+    thing_model = db.query(ThingModel).filter(ThingModel.thing_id == id).first()
+    if thing_model is None:
+        raise HTTPException(
+            status_code=404, 
+            detail="Thing not found"
+        )
+    thing_model.name = thing.name
+    thing_model.board_pin = thing.board_pin
+    thing_model.status = thing.status
+    db.add(thing_model)
+    db.commit()
+    return thing
+
+
+
+# @app.delete("/")
+# async def delete_thing(id: int, thing: Thing):
 #     try:
-#         GPIO.setup(num, GPIO.OUT)
-#         GPIO.output(num, status)
-#         print(num)
-#         return f"testing pin {num}"
+#         obj = thing_list.pop(id)
+#         return obj
 #     except:
-#          raise HTTPException(status_code=500, detail="Invalid rpi pin")
+#         raise HTTPException(status_code=404, detail="Thing not found")
 
 
-
-@app.post("/thing/")
-async def create_thing(thing: Thing):
+@app.get("/pin_test/{num}/{status}")
+async def avivate_pin(num: int, status: int):
     try:
-        thing_list.append(thing)
-        return thing
+        GPIO.setup(num, GPIO.OUT)
+        GPIO.output(num, status)
+        print(num)
+        return f"testing pin {num}"
     except:
-        raise HTTPException(status_code=404, detail="No things created")
+         raise HTTPException(status_code=500, detail="Invalid rpi pin")
 
 
-@app.get("/thing/", response_model=List[Thing])
-async def get_all_things():
-    return thing_list
-
-
-@app.get("/thing/{id}")
-async def get_thing(id: int):
-    try:
-        return thing_list[id]
-    except:
-        raise HTTPException(status_code=404, detail="Thing not found")
-
-
-@app.put("/thing/{id}")
-async def update_thing(id: int, thing: Thing):
-    try:
-        thing_list[id] = thing
-        return thing_list[id]
-    except:
-        raise HTTPException(status_code=404, detail="Thing not found")
-
-
-@app.delete("/thing/{id}")
-async def delete_thing(id: int, thing: Thing):
-    try:
-        obj = thing_list.pop(id)
-        return obj
-    except:
-        raise HTTPException(status_code=404, detail="Thing not found")
 
 
 async def main():
