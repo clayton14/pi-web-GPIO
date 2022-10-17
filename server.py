@@ -90,15 +90,10 @@ async def update_status(id: int, status: bool, db:  session = Depends(get_db)):
         GPIO.setup(thing_model.board_pin, GPIO.OUT)
         GPIO.output(thing_model.board_pin, not status)
 
-
     db.add(thing_model)
     db.commit()
 
-
-
     return status
-
-
 
 
 @app.delete("/{id}")
@@ -109,23 +104,15 @@ async def delete_thing(id: int, db: session = Depends(get_db)):
             status_code =  404,
             detail=f"ID {id}: Does not exist"
         )
+
+    GPIO.setup(thing_model.board_pin, GPIO.OUT)
+    GPIO.output(thing_model.board_pin, False)
+
+
     db.query(ThingModel).filter(ThingModel.thing_id == id).delete()
     db.commit()
  
     return f"{thing_model.name} has been deleted"
-
-# @app.get("/pin_test/{num}/{status}")
-# async def avivate_pin(num: int, status: int):
-#     try:
-#         GPIO.setup(num, GPIO.OUT)
-#         GPIO.output(num, status)
-#         print(num)
-#         return f"testing pin {num}"
-#     except:
-#          raise HTTPException(
-#             status_code=500, 
-#             detail="Invalid rpi pin"
-#         )
 
 
 
