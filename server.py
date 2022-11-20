@@ -12,6 +12,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 
+# TODO - mDNS responder config
+# TODO - add on/off date and times for 'Things' (e.g light on every monday @ 6pm)
+# TODO - create front end app
+# TODO - voice activation client in JS
+
 app = FastAPI(title="Power Controll")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
