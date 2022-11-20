@@ -6,3 +6,4 @@ share
 __pycache__
 things.db
 static/images
+things.db
