@@ -4,15 +4,56 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link id="favicon" rel="icon" type="image/x-icon" href="static/images/icon.ico">
-    <script src="static/index.js" type="text/javascript"></script>
+    <!-- <script src="./static/index.js" type="text/javascript"></script> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
-    <h1></h1>
-    <p></p>
+
+    <div id="app"></div>
+
 </body>
 
+<script>
+    let test_ip = "http://127.0.0.1:8000/things/"
+    async function get_things(endpoint){
+        let response = await fetch(endpoint);
+        let data = await response.json();
+        return data;
+    }
 
+
+    async function update_things(){
+        return null;
+    }
+
+    async function create_thing(){
+        return null;
+    }
+
+    async function remove_thing(){
+        return null;
+    }
+
+    async function update_status(){
+        return null;
+    }
+
+    
+
+    function build_html(){
+        let things = get_things(test_ip)
+        console.log("build fuc" + things.finally)
+        document.getElementById("app").innerHTML = 
+        `
+        ${things.length}
+        `
+
+    }
+
+    console.log(get_things(test_ip))
+    build_html()
+
+</script>
 
 </html>
