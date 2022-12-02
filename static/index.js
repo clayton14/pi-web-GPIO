@@ -1,18 +1,20 @@
-let test_ip = "http://127.0.0.1:8000/things/"
+const test_ip = "http://127.0.0.1:8000/things/"
+
     async function get_things(endpoint){
-        let response = await fetch(endpoint, {
+        const response = await fetch(endpoint, {
             method: "GET"
         })
-        .then(res => {
+        .then((res) => {
             if(res.ok){
-                return res.json()
+                console.log(res)
+                return JSON.stringify(res)
             }else{
                 console.error("[ERROR] something is not working")
             }
+        }).then((data) => {
+            console.log(data)
         })
-        .then(json => {
-            return json
-        })
+
         
         // let data = await response.json();
         // return data;
@@ -43,14 +45,13 @@ let test_ip = "http://127.0.0.1:8000/things/"
     
 
     function build_html(){
-        let things = get_things(test_ip)
-        console.log(typeof things)
-        document.getElementById("app").innerHTML = 
-        `
-        <p>${things}</p>
-        `
 
+        console.log(thing.map())
+            document.getElementById("app").innerHTML = 
+            `
+            
+            `
     }
-    build_html()
-    console.log(get_things(test_ip))
+
+  get_things(test_ip)
     
